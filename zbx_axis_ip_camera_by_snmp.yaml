@@ -1,0 +1,174 @@
+zabbix_export:
+  version: '6.4'
+  template_groups:
+    - uuid: 2100563158bb426ca1580b81f96c4949
+      name: 'Templates/IP Cameras'
+  templates:
+    - uuid: 0ecc90895fac439f9f05e5371550cf7b
+      template: 'AXIS IP Camera by SNMP'
+      name: 'AXIS IP Camera by SNMP'
+      vendor:
+        name: Airler
+        version: 6.4-0
+      groups:
+        - name: 'Templates/IP Cameras'
+      items:
+        - uuid: 0a21a11458af44ee96a562fad65a56fa
+          name: 'Firmware version'
+          type: DEPENDENT
+          key: system.fw
+          delay: '0'
+          trends: '0'
+          value_type: CHAR
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - 'return value.split(";")[3].trim();'
+          master_item:
+            key: system.info
+          triggers:
+            - uuid: d44114ec42164c95addbcd75b05d262a
+              expression: 'change(/AXIS IP Camera by SNMP/system.fw) and length(last(/AXIS IP Camera by SNMP/system.fw))>0'
+              recovery_mode: NONE
+              name: 'Firmware version changed'
+              event_name: 'Firmware version changed (new version: {ITEM.VALUE})'
+              priority: INFO
+              description: 'Firmware version has changed. Ack to close.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: 5e4be6f2687b45818d22f40d606225cf
+          name: 'MAC address'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.2.2.1.6.2
+          key: 'system.hw.mac[ifPhysAddress.2]'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: MACADDRESS_A
+          tags:
+            - tag: component
+              value: system
+        - uuid: 0cb4d3f3f4494b969e179cfc951b9aa2
+          name: 'Uptime (hardware)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.25.1.1.0
+          key: 'system.hw.uptime[hrSystemUptime.0]'
+          delay: 15m
+          trends: '0'
+          status: DISABLED
+          units: uptime
+          description: |
+            MIB: HOST-RESOURCES-MIB
+            The amount of time since this host was last initialized. Note that this is different from sysUpTime in the SNMPv2-MIB [RFC1907] because sysUpTime is the uptime of the network management portion of the system.
+          preprocessing:
+            - type: CHECK_NOT_SUPPORTED
+              parameters:
+                - ''
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: component
+              value: system
+        - uuid: c76f86f6b0014da9a53046220765f48a
+          name: 'System info'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.1.0
+          key: system.info
+          delay: 1h
+          history: '0'
+          trends: '0'
+          value_type: CHAR
+          tags:
+            - tag: component
+              value: raw
+        - uuid: b43305074fcf4c78aa50adf7c59c9557
+          name: 'System location'
+          type: SNMP_AGENT
+          snmp_oid: 'SNMPv2-MIB::sysLocation.0'
+          key: 'system.location[sysLocation.0]'
+          delay: 15m
+          trends: '0'
+          status: DISABLED
+          value_type: CHAR
+          tags:
+            - tag: component
+              value: system
+        - uuid: 6dfc7bfc0878448db4dd52ac6f45461a
+          name: Model
+          type: DEPENDENT
+          key: system.model
+          delay: '0'
+          trends: '0'
+          value_type: CHAR
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - 'return value.split(";")[1].trim();'
+          master_item:
+            key: system.info
+        - uuid: 69b42416cbf8494b9d9e930eaa6f919a
+          name: 'Uptime (network)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.3.0
+          key: 'system.net.uptime[sysUpTime.0]'
+          delay: 15m
+          units: uptime
+          description: |
+            MIB: SNMPv2-MIB
+            The time (in hundredths of a second) since the network management portion of the system was last re-initialized.
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            - tag: component
+              value: system
+        - uuid: 80ff029fc400496aaba2f325f0d67f56
+          name: 'SNMP agent availability'
+          type: INTERNAL
+          key: 'zabbix[host,snmp,available]'
+          description: |
+            Availability of SNMP checks on the host. The value of this item corresponds to availability icons in the host list.
+            Possible value:
+            0 - not available
+            1 - available
+            2 - unknown
+          valuemap:
+            name: zabbix.host.available
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 86e045ce46e8481eacc36b2cb3d771ce
+              expression: 'max(/AXIS IP Camera by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0'
+              name: 'No SNMP data collection'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'SNMP is not available for polling. Please check device connectivity and SNMP settings.'
+              tags:
+                - tag: scope
+                  value: availability
+      tags:
+        - tag: class
+          value: 'ip camera'
+        - tag: target
+          value: axis
+      macros:
+        - macro: '{$SNMP.TIMEOUT}'
+          value: 5m
+      valuemaps:
+        - uuid: a4b56fe00a9d4809b359269fa3b0f8ba
+          name: zabbix.host.available
+          mappings:
+            - value: '0'
+              newvalue: 'not available'
+            - value: '1'
+              newvalue: available
+            - value: '2'
+              newvalue: unknown

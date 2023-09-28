@@ -1,0 +1,17 @@
+zabbix_export:
+  version: '6.4'
+  template_groups:
+    - uuid: 2100563158bb426ca1580b81f96c4949
+      name: 'Templates/IP Cameras'
+  templates:
+    - uuid: 78dfe3b769fd457ea7a684d2b2c6f509
+      template: 'AXIS IP Camera'
+      name: 'AXIS IP Camera'
+      vendor:
+        name: Airler
+        version: 6.4-0
+      templates:
+        - name: 'AXIS IP Camera by HTTP'
+        - name: 'AXIS IP Camera by SNMP'
+      groups:
+        - name: 'Templates/IP Cameras'

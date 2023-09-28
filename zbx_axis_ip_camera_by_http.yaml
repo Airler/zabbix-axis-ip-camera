@@ -1,0 +1,196 @@
+zabbix_export:
+  version: '6.4'
+  template_groups:
+    - uuid: 2100563158bb426ca1580b81f96c4949
+      name: 'Templates/IP Cameras'
+  templates:
+    - uuid: 4014cd9de4964ad190fc263a48029968
+      template: 'AXIS IP Camera by HTTP'
+      name: 'AXIS IP Camera by HTTP'
+      description: |
+        https://www.axis.com/techsup/developer_doc/acap3/3.00.0/sdk/html/_2_sdk_env_setup.html
+      vendor:
+        name: Airler
+        version: 6.4-0
+      groups:
+        - name: 'Templates/IP Cameras'
+      items:
+        - uuid: df2eb33ef93e49b29a1449302130c412
+          name: Architecture
+          type: DEPENDENT
+          key: axis.vapix.architecture
+          delay: '0'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: HW_ARCH
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data.propertyList.Architecture
+          master_item:
+            key: axis.vapix.raw
+          tags:
+            - tag: component
+              value: system
+        - uuid: c87e982a9d88470486c2f164f912173f
+          name: 'Firmware build date'
+          type: DEPENDENT
+          key: axis.vapix.fwbuilddate
+          delay: '0'
+          trends: '0'
+          value_type: CHAR
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data.propertyList.BuildDate
+          master_item:
+            key: axis.vapix.raw
+          tags:
+            - tag: component
+              value: system
+        - uuid: c21eaa437378445796542c62a25fcea0
+          name: 'Firmware version'
+          type: DEPENDENT
+          key: axis.vapix.fwversion
+          delay: '0'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: OS
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data.propertyList.Version
+          master_item:
+            key: axis.vapix.raw
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 55179dbcdc3644cc9116190fa4c02e74
+              expression: 'change(/AXIS IP Camera by HTTP/axis.vapix.fwversion) and length(last(/AXIS IP Camera by HTTP/axis.vapix.fwversion))>0'
+              recovery_mode: NONE
+              name: 'Firmware version changed'
+              event_name: 'Firmware version changed (new version: {ITEM.VALUE})'
+              priority: INFO
+              description: 'Firmware version has changed. Ack to close.'
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: e31b8c8cc9d0475b8ad4e83d6dad0a47
+          name: 'Hardware ID'
+          type: DEPENDENT
+          key: axis.vapix.hwid
+          delay: '0'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: CHASSIS
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data.propertyList.HardwareID
+          master_item:
+            key: axis.vapix.raw
+          tags:
+            - tag: component
+              value: system
+        - uuid: b1d63c76c2134c20b79d33f87f79f1d9
+          name: Model
+          type: DEPENDENT
+          key: axis.vapix.model
+          delay: '0'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: MODEL
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data.propertyList.ProdNbr
+          master_item:
+            key: axis.vapix.raw
+          tags:
+            - tag: component
+              value: system
+        - uuid: ff3d776675b54b2082f7da1478d7f0ea
+          name: 'VAPIX RAW Data'
+          type: HTTP_AGENT
+          key: axis.vapix.raw
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          authtype: DIGEST
+          username: root
+          password: '{$AXIS_HTTP_PASS}'
+          url: 'http://{HOST.CONN}/axis-cgi/basicdeviceinfo.cgi'
+          posts: |
+            {
+              "apiVersion":"1.0",
+              "context":"Client defined request ID",
+              "method":"getAllProperties"
+            }
+          post_type: JSON
+          request_method: POST
+          tags:
+            - tag: component
+              value: raw
+        - uuid: fbd2e8bd959d4cdd876bc4f7381d6d12
+          name: 'Serial Number'
+          type: DEPENDENT
+          key: axis.vapix.serialnumber
+          delay: '0'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: SERIALNO_A
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data.propertyList.SerialNumber
+          master_item:
+            key: axis.vapix.raw
+          tags:
+            - tag: component
+              value: system
+          triggers:
+            - uuid: 9981b2f248744a4eb3ab0c9c323a09b7
+              expression: 'change(/AXIS IP Camera by HTTP/axis.vapix.serialnumber) and length(last(/AXIS IP Camera by HTTP/axis.vapix.serialnumber))>0'
+              name: 'Device has been replaced'
+              priority: INFO
+              manual_close: 'YES'
+              tags:
+                - tag: scope
+                  value: notice
+        - uuid: ee193da10b924208b0177a1a19d36700
+          name: Vendor
+          type: DEPENDENT
+          key: axis.vapix.vendor
+          delay: '0'
+          trends: '0'
+          value_type: CHAR
+          inventory_link: VENDOR
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data.propertyList.Brand
+          master_item:
+            key: axis.vapix.raw
+          tags:
+            - tag: component
+              value: system
+      tags:
+        - tag: class
+          value: 'ip camera'
+        - tag: target
+          value: axis
+      macros:
+        - macro: '{$AXIS_HTTP_PASS}'
+          type: SECRET_TEXT
+      valuemaps:
+        - uuid: 0023c3e95006428fb07436109fefbd97
+          name: zabbix.host.available
+          mappings:
+            - value: '0'
+              newvalue: 'not available'
+            - value: '1'
+              newvalue: available
+            - value: '2'
+              newvalue: unknown
