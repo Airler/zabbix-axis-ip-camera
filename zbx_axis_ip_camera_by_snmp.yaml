@@ -13,6 +13,36 @@ zabbix_export:
       groups:
         - name: 'Templates/IP Cameras'
       items:
+        - uuid: 11e97b21b47f4f05ba81ed74c404d8f1
+          name: 'SNMP walk interfaces'
+          type: SNMP_AGENT
+          snmp_oid: 'walk[.1.3.6.1.2.1.2]'
+          key: interfaces.walk
+          history: '0'
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: raw
+        - uuid: c393a64c1a0b458db335965fcb8a9a78
+          name: 'SNMP walk storages'
+          type: SNMP_AGENT
+          snmp_oid: 'walk[ .1.3.6.1.4.1.368.4.1.8]'
+          key: storages.walk
+          history: '0'
+          value_type: CHAR
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: component
+              value: raw
         - uuid: 0a21a11458af44ee96a562fad65a56fa
           name: 'Firmware version'
           type: DEPENDENT
@@ -106,8 +136,9 @@ zabbix_export:
           type: DEPENDENT
           key: system.model
           delay: '0'
-          trends: '0'
+          history: 90d
           value_type: CHAR
+          trends: '0'
           preprocessing:
             - type: JAVASCRIPT
               parameters:
@@ -160,15 +191,231 @@ zabbix_export:
               tags:
                 - tag: scope
                   value: availability
+      discovery_rules:
+        - uuid: d35da453a53147b0815d73035595f5a2
+          name: 'Interface discovery'
+          type: DEPENDENT
+          key: interfaces.discovery
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#IFNAME}'
+                value: '{$NET.IF.IFNAME.MATCHES}'
+                formulaid: A
+          item_prototypes:
+            - uuid: 3e0146c460a54339b304c24a88c5900f
+              name: 'Interface {#IFNAME}: Admin Status'
+              type: DEPENDENT
+              key: 'interface.adminStatus[{#SNMPINDEX}]'
+              delay: '0'
+              history: 90d
+              valuemap:
+                name: ifStatus
+              preprocessing:
+                - type: SNMP_WALK_VALUE
+                  parameters:
+                    - '.1.3.6.1.2.1.2.2.1.7.{#SNMPINDEX}'
+                    - '0'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              master_item:
+                key: interfaces.walk
+            - uuid: bf84cfa29865421aabf43eccf18a5a6f
+              name: 'Interface {#IFNAME}: Incoming octets'
+              type: DEPENDENT
+              key: 'interface.ifInOctets[{#SNMPINDEX}]'
+              delay: '0'
+              history: 90d
+              units: '!Octets'
+              preprocessing:
+                - type: SNMP_WALK_VALUE
+                  parameters:
+                    - '.1.3.6.1.2.1.2.2.1.10.{#SNMPINDEX}'
+                    - '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: interfaces.walk
+            - uuid: 2aa26f8974424906aaf272ca4804eaf1
+              name: 'Interface {#IFNAME}: Outgoing octets'
+              type: DEPENDENT
+              key: 'interface.ifOutOctets[{#SNMPINDEX}]'
+              delay: '0'
+              history: 90d
+              units: '!Octets'
+              preprocessing:
+                - type: SNMP_WALK_VALUE
+                  parameters:
+                    - '.1.3.6.1.2.1.2.2.1.16.{#SNMPINDEX}'
+                    - '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: interfaces.walk
+            - uuid: ebe6d4c768814bf19e9c68318c476da9
+              name: 'Interface {#IFNAME}: MAC address'
+              type: DEPENDENT
+              key: 'interface.mac[{#SNMPINDEX}]'
+              delay: '0'
+              history: 90d
+              value_type: CHAR
+              trends: '0'
+              preprocessing:
+                - type: SNMP_WALK_VALUE
+                  parameters:
+                    - '.1.3.6.1.2.1.2.2.1.6.{#SNMPINDEX}'
+                    - '2'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              master_item:
+                key: interfaces.walk
+            - uuid: 89987cb2a3e048dcb9894ca205030f3c
+              name: 'Interface {#IFNAME}: MTU'
+              type: DEPENDENT
+              key: 'interface.mtu[{#SNMPINDEX}]'
+              delay: '0'
+              history: 90d
+              units: bytes
+              preprocessing:
+                - type: SNMP_WALK_VALUE
+                  parameters:
+                    - '.1.3.6.1.2.1.2.2.1.4.{#SNMPINDEX}'
+                    - '0'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              master_item:
+                key: interfaces.walk
+            - uuid: 1deb78fe5b4746cc9d7f018e584a9e1e
+              name: 'Interface {#IFNAME}: Operation Status'
+              type: DEPENDENT
+              key: 'interface.operStatus[{#SNMPINDEX}]'
+              delay: '0'
+              history: 90d
+              valuemap:
+                name: ifStatus
+              preprocessing:
+                - type: SNMP_WALK_VALUE
+                  parameters:
+                    - '.1.3.6.1.2.1.2.2.1.8.{#SNMPINDEX}'
+                    - '0'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              master_item:
+                key: interfaces.walk
+            - uuid: ef4ace99198c4e45aa429737012fd1f7
+              name: 'Interface {#IFNAME}: Speed'
+              type: DEPENDENT
+              key: 'interface.speed[{#SNMPINDEX}]'
+              delay: '0'
+              history: 90d
+              preprocessing:
+                - type: SNMP_WALK_VALUE
+                  parameters:
+                    - '.1.3.6.1.2.1.2.2.1.5.{#SNMPINDEX}'
+                    - '0'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              master_item:
+                key: interfaces.walk
+          master_item:
+            key: interfaces.walk
+          preprocessing:
+            - type: SNMP_WALK_TO_JSON
+              parameters:
+                - '{#IFNAME}'
+                - .1.3.6.1.2.1.2.2.1.2
+                - '1'
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+        - uuid: 5d782f3c8b634a7db3244357896a84f4
+          name: 'Storage discovery'
+          type: DEPENDENT
+          key: storage.discovery
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#STORAGENAME}'
+                value: '{$STORAGE.NAME.MATCHES}'
+                formulaid: A
+          item_prototypes:
+            - uuid: 1140e5341bd94b6f8204eebe1b6c53a1
+              name: 'Storage {#STORAGENAME}: Disruption detected'
+              type: DEPENDENT
+              key: 'storage.disruptionDetected[{#SNMPINDEX}]'
+              delay: '0'
+              valuemap:
+                name: disruptionDetected
+              preprocessing:
+                - type: SNMP_WALK_VALUE
+                  parameters:
+                    - '.1.3.6.1.4.1.368.4.1.8.1.3.{#SNMPINDEX}'
+                    - '0'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              master_item:
+                key: storages.walk
+              tags:
+                - tag: component
+                  value: health
+              trigger_prototypes:
+                - uuid: 10844ff2ad3f42209f2ff44f3e505731
+                  expression: 'last(/AXIS IP Camera by SNMP/storage.disruptionDetected[{#SNMPINDEX}])<>1'
+                  name: 'Storage {#STORAGENAME}: Disruption detected'
+                  priority: WARNING
+                  tags:
+                    - tag: scope
+                      value: availability
+          master_item:
+            key: storages.walk
+          preprocessing:
+            - type: SNMP_WALK_TO_JSON
+              parameters:
+                - '{#STORAGENAME}'
+                - .1.3.6.1.4.1.368.4.1.8.1.2
+                - '1'
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
       tags:
         - tag: class
           value: 'ip camera'
         - tag: target
           value: axis
       macros:
+        - macro: '{$NET.IF.IFNAME.MATCHES}'
+          value: (^eth)
+          description: 'Network interfaces to discover'
         - macro: '{$SNMP.TIMEOUT}'
           value: 5m
+        - macro: '{$STORAGE.NAME.MATCHES}'
+          value: '*'
+          description: 'Storage names to discover'
       valuemaps:
+        - uuid: 588fb6e8a852488586be79faf5bf5be5
+          name: disruptionDetected
+          mappings:
+            - value: '2'
+              newvalue: 'yes'
+            - value: '1'
+              newvalue: 'no'
+        - uuid: 70a9724231d945c5a3f961b88a915ce9
+          name: ifStatus
+          mappings:
+            - value: '1'
+              newvalue: up
+            - value: '2'
+              newvalue: down
+            - value: '3'
+              newvalue: testing
         - uuid: a4b56fe00a9d4809b359269fa3b0f8ba
           name: zabbix.host.available
           mappings:
