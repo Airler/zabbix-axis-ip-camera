@@ -1,5 +1,5 @@
 zabbix_export:
-  version: '6.4'
+  version: '7.0'
   template_groups:
     - uuid: 2100563158bb426ca1580b81f96c4949
       name: 'Templates/IP Cameras'
@@ -20,8 +20,9 @@ zabbix_export:
           type: DEPENDENT
           key: axis.vapix.architecture
           delay: '0'
-          trends: '0'
+          history: 90d
           value_type: CHAR
+          trends: '0'
           inventory_link: HW_ARCH
           preprocessing:
             - type: JSONPATH
@@ -37,8 +38,9 @@ zabbix_export:
           type: DEPENDENT
           key: axis.vapix.fwbuilddate
           delay: '0'
-          trends: '0'
+          history: 90d
           value_type: CHAR
+          trends: '0'
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -53,8 +55,9 @@ zabbix_export:
           type: DEPENDENT
           key: axis.vapix.fwversion
           delay: '0'
-          trends: '0'
+          history: 90d
           value_type: CHAR
+          trends: '0'
           inventory_link: OS
           preprocessing:
             - type: JSONPATH
@@ -82,8 +85,9 @@ zabbix_export:
           type: DEPENDENT
           key: axis.vapix.hwid
           delay: '0'
-          trends: '0'
+          history: 90d
           value_type: CHAR
+          trends: '0'
           inventory_link: CHASSIS
           preprocessing:
             - type: JSONPATH
@@ -99,8 +103,9 @@ zabbix_export:
           type: DEPENDENT
           key: axis.vapix.model
           delay: '0'
-          trends: '0'
+          history: 90d
           value_type: CHAR
+          trends: '0'
           inventory_link: MODEL
           preprocessing:
             - type: JSONPATH
@@ -116,19 +121,20 @@ zabbix_export:
           type: HTTP_AGENT
           key: axis.vapix.raw
           history: '0'
-          trends: '0'
           value_type: TEXT
+          trends: '0'
           authtype: DIGEST
           username: root
           password: '{$AXIS_HTTP_PASS}'
+          timeout: 3s
           url: 'http://{HOST.CONN}/axis-cgi/basicdeviceinfo.cgi'
+          post_type: JSON
           posts: |
             {
               "apiVersion":"1.0",
               "context":"Client defined request ID",
               "method":"getAllProperties"
             }
-          post_type: JSON
           request_method: POST
           tags:
             - tag: component
@@ -138,8 +144,9 @@ zabbix_export:
           type: DEPENDENT
           key: axis.vapix.serialnumber
           delay: '0'
-          trends: '0'
+          history: 90d
           value_type: CHAR
+          trends: '0'
           inventory_link: SERIALNO_A
           preprocessing:
             - type: JSONPATH
@@ -164,8 +171,9 @@ zabbix_export:
           type: DEPENDENT
           key: axis.vapix.vendor
           delay: '0'
-          trends: '0'
+          history: 90d
           value_type: CHAR
+          trends: '0'
           inventory_link: VENDOR
           preprocessing:
             - type: JSONPATH

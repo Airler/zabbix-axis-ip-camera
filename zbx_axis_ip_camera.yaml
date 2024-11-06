@@ -1,5 +1,5 @@
 zabbix_export:
-  version: '6.4'
+  version: '7.0'
   template_groups:
     - uuid: 2100563158bb426ca1580b81f96c4949
       name: 'Templates/IP Cameras'
