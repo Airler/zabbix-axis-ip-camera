@@ -72,7 +72,7 @@ zabbix_export:
         - uuid: 5e4be6f2687b45818d22f40d606225cf
           name: 'MAC address'
           type: SNMP_AGENT
-          snmp_oid: 1.3.6.1.2.1.2.2.1.6.2
+          snmp_oid: 'get[1.3.6.1.2.1.2.2.1.6.2]'
           key: 'system.hw.mac[ifPhysAddress.2]'
           history: 90d
           value_type: CHAR
@@ -84,7 +84,7 @@ zabbix_export:
         - uuid: 0cb4d3f3f4494b969e179cfc951b9aa2
           name: 'Uptime (hardware)'
           type: SNMP_AGENT
-          snmp_oid: 1.3.6.1.2.1.25.1.1.0
+          snmp_oid: 'get[1.3.6.1.2.1.25.1.1.0]'
           key: 'system.hw.uptime[hrSystemUptime.0]'
           delay: 15m
           history: 90d
@@ -109,7 +109,7 @@ zabbix_export:
         - uuid: c76f86f6b0014da9a53046220765f48a
           name: 'System info'
           type: SNMP_AGENT
-          snmp_oid: 1.3.6.1.2.1.1.1.0
+          snmp_oid: 'get[SNMPv2-MIB::sysDescr.0]'
           key: system.info
           delay: 1h
           history: '0'
@@ -121,7 +121,7 @@ zabbix_export:
         - uuid: b43305074fcf4c78aa50adf7c59c9557
           name: 'System location'
           type: SNMP_AGENT
-          snmp_oid: 'SNMPv2-MIB::sysLocation.0'
+          snmp_oid: 'get[SNMPv2-MIB::sysLocation.0]'
           key: 'system.location[sysLocation.0]'
           delay: 15m
           history: 90d
@@ -148,7 +148,7 @@ zabbix_export:
         - uuid: 69b42416cbf8494b9d9e930eaa6f919a
           name: 'Uptime (network)'
           type: SNMP_AGENT
-          snmp_oid: 1.3.6.1.2.1.1.3.0
+          snmp_oid: 'get[SNMPv2-MIB::sysUpTime.0]'
           key: 'system.net.uptime[sysUpTime.0]'
           delay: 15m
           history: 90d
